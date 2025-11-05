@@ -4,8 +4,15 @@ import { auth } from '@my-app/auth'
 import { trpcServer } from '@hono/trpc-server'
 import { appRouter } from './trpc/root'
 import { createContext } from './trpc/context'
+import { syncContentToDatabase } from '@my-app/content'
 
 const app = new Hono()
+
+// Sync content on startup
+console.log('[Startup] Syncing content from filesystem to database...')
+syncContentToDatabase().catch((err) => {
+  console.error('[Startup] Failed to sync content:', err)
+})
 
 // Global CORS middleware
 app.use('*', cors({
@@ -30,6 +37,20 @@ app.use('*', async (c, next) => {
 app.get('/', (c) => c.text('Hello from Hono!'))
 
 app.get('/health', (c) => c.json({ status: 'ok' }))
+
+// Manual content sync endpoint (dev only)
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api/sync-content', async (c) => {
+    try {
+      console.log('[Manual Sync] Triggered via endpoint')
+      await syncContentToDatabase()
+      return c.json({ success: true, message: 'Content synced successfully' })
+    } catch (err: any) {
+      console.error('[Manual Sync] Failed:', err)
+      return c.json({ success: false, error: err.message }, 500)
+    }
+  })
+}
 
 // Better Auth handler - create dedicated sub-app and mount it
 const authApp = new Hono()
