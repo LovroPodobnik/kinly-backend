@@ -209,15 +209,74 @@ Markdown body here...
 - `drizzle-kit push` doesn't work with Bun's native SQLite (use `migrate-content.ts` instead)
 - Content cache is in-memory only (reset on server restart, acceptable for MVP)
 
+## Progress Tracking (Phase 1) ✅
+
+**Branch:** `feature/content-system`
+**Status:** Implemented, tested, working
+
+### User Stats Table
+New `user_stats` table for global gamification:
+- `totalXp` - Accumulated XP across all courses
+- `level` - Calculated from total XP (linear: 100 XP = 1 level)
+- `currentStreak` - Days of consecutive activity
+- `longestStreak` - Best streak achieved
+- `lastActivityDate` - For streak calculation
+
+### Helper Functions (`packages/content/src/progress.ts`)
+- `awardXP(userId, amount)` - Award XP, calculate level
+- `updateStreak(userId)` - Track daily activity streaks
+- `calculateProgress(enrollmentId)` - Calculate % complete
+- `checkCourseCompletion(enrollmentId)` - Detect course completion
+
+### New tRPC Endpoints
+**Mutation:**
+- `courses.markLessonComplete({ courseId, lessonId })` - Complete lesson, award XP, update progress
+
+**Queries:**
+- `courses.getUserStats()` - Get user's global stats (XP, level, streaks)
+- `courses.getProgress()` - Get current enrollment progress with lesson details
+- `courses.canEnroll()` - Check if can enroll in new course
+
+### Lesson Completion Flow
+1. Verify user enrollment
+2. Verify lesson exists
+3. Check if already completed (prevent duplicate XP)
+4. Create lesson progress record
+5. Award lesson XP
+6. Update enrollment progress
+7. Update streak
+8. Check course completion
+9. If complete: award course bonus XP, mark enrollment complete
+
+### XP Formula
+- Linear: Every 100 XP = 1 level
+- Lesson XP: Defined in lesson frontmatter (`xpReward`)
+- Course bonus: Defined in course.json (`gamification.xpReward`)
+
+### Testing
+```bash
+# Complete a lesson (requires auth token)
+curl -X POST http://localhost:3000/trpc/courses.markLessonComplete \
+  -H "Authorization: Bearer <token>" \
+  -d '{"courseId":"ai-za-zacetnike","lessonId":"uvod-v-ai"}'
+
+# Get user stats
+curl http://localhost:3000/trpc/courses.getUserStats \
+  -H "Authorization: Bearer <token>"
+
+# Get progress
+curl http://localhost:3000/trpc/courses.getProgress \
+  -H "Authorization: Bearer <token>"
+```
+
 ## Next Steps (Not Implemented)
 
-- User enrollment flow (frontend)
-- Lesson completion tracking
-- XP/level system
-- Streak tracking
-- Badge system
-- User progress queries
-- Course completion logic
+- Frontend integration
+- Badge system (course completion badges)
+- Achievement system
+- Leaderboard (optional)
+- User dashboard
+- Activity feed
 
 ## Git Branch State
 
