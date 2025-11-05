@@ -1,0 +1,21 @@
+{
+  "id": "ai-za-zacetnike",
+  "title": "AI za začetnike",
+  "slug": "ai-za-zacetnike",
+  "shortDescription": "Nauči se osnov umetne inteligence brez tehničnega predznanja",
+  "description": "V tem tečaju boš spoznal osnove AI, kako uporabljati ChatGPT in uporabiti AI v vsakdanjem življenju. Brez programiranja, samo praktično znanje.",
+  "difficulty": "beginner",
+  "category": "AI osnove",
+  "estimatedHours": 8,
+  "order": 1,
+  "status": "published",
+  "gamification": {
+    "xpReward": 500,
+    "badgeId": "first-steps"
+  },
+  "prerequisites": [],
+  "unlocks": ["chatbot-gradnja"],
+  "published": true,
+  "publishedAt": "2025-01-15T00:00:00Z",
+  "updatedAt": "2025-01-20T10:30:00Z"
+}
