@@ -1,8 +1,26 @@
 import fs from 'fs/promises';
+import fsSync from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 
-const CONTENT_DIR = path.join(process.cwd(), 'content/courses');
+// Look for content directory from project root (works in monorepo)
+const findProjectRoot = (): string => {
+  let currentDir = process.cwd();
+
+  // Keep going up until we find the content directory or reach filesystem root
+  while (currentDir !== '/') {
+    const contentPath = path.join(currentDir, 'content/courses');
+    if (fsSync.existsSync(contentPath)) {
+      return contentPath;
+    }
+    currentDir = path.dirname(currentDir);
+  }
+
+  // Fallback to relative from cwd
+  return path.join(process.cwd(), '../../content/courses');
+};
+
+const CONTENT_DIR = findProjectRoot();
 
 export interface CourseMetadata {
   id: string;
