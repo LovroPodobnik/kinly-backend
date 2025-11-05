@@ -13,6 +13,7 @@
     "@hono/trpc-server": "0.4.0",
     "zod": "3.25.1",
     "@my-app/auth": "*",
-    "@my-app/db": "*"
+    "@my-app/db": "*",
+    "@my-app/content": "*"
   }
 }
