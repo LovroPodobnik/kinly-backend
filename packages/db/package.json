@@ -1,0 +1,13 @@
+{
+  "name": "@my-app/db",
+  "version": "0.1.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "drizzle-orm": "0.44.7",
+    "better-sqlite3": "^10.0.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.30.0"
+  }
+}

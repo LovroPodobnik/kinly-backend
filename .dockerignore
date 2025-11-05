@@ -1,0 +1,8 @@
+node_modules
+.git
+.env
+sqlite.db
+*.md
+.DS_Store
+dist
+.turbo
