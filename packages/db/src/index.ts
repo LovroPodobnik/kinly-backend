@@ -36,6 +36,7 @@ export const {
   lessons,
   userEnrollments,
   userLessonProgress,
+  userStats,
 } = schema;
 
 export { db, schema };

@@ -73,9 +73,15 @@ export type Verification = typeof verifications.$inferSelect;
 export type NewVerification = typeof verifications.$inferInsert;
 
 // Relationships (For type-safe joins in Drizzle)
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   sessions: many(sessions),
   accounts: many(accounts),
+  stats: one(userStats, {
+    fields: [users.id],
+    references: [userStats.userId],
+  }),
+  enrollments: many(userEnrollments),
+  lessonProgress: many(userLessonProgress),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -182,6 +188,21 @@ export const userLessonProgress = pgTable('user_lesson_progress', {
 export type UserLessonProgress = typeof userLessonProgress.$inferSelect;
 export type NewUserLessonProgress = typeof userLessonProgress.$inferInsert;
 
+// User Stats (Global gamification stats across all courses)
+export const userStats = pgTable('user_stats', {
+  userId: text('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+  totalXp: integer('total_xp').notNull().default(0),
+  level: integer('level').notNull().default(1),
+  currentStreak: integer('current_streak').notNull().default(0),
+  longestStreak: integer('longest_streak').notNull().default(0),
+  lastActivityDate: timestamp('last_activity_date'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export type UserStats = typeof userStats.$inferSelect;
+export type NewUserStats = typeof userStats.$inferInsert;
+
 // Relations
 export const coursesRelations = relations(courses, ({ many }) => ({
   lessons: many(lessons),
@@ -219,5 +240,12 @@ export const userLessonProgressRelations = relations(userLessonProgress, ({ one 
   course: one(courses, {
     fields: [userLessonProgress.courseId],
     references: [courses.id],
+  }),
+}));
+
+export const userStatsRelations = relations(userStats, ({ one }) => ({
+  user: one(users, {
+    fields: [userStats.userId],
+    references: [users.id],
   }),
 }));
