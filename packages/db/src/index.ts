@@ -27,6 +27,15 @@ if (DATABASE_URL) {
 }
 
 // Export the active schema tables
-export const { users, sessions, accounts, verifications } = schema;
+export const {
+  users,
+  sessions,
+  accounts,
+  verifications,
+  courses,
+  lessons,
+  userEnrollments,
+  userLessonProgress,
+} = schema;
 
 export { db, schema };
