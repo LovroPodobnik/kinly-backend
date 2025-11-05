@@ -5,7 +5,7 @@ import { relations } from 'drizzle-orm';
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
-  emailVerified: integer('email_verified', { mode: 'boolean' }).default(0),
+  emailVerified: integer('email_verified', { mode: 'boolean' }).default(false),
   name: text('name'),
   image: text('image'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
@@ -136,7 +136,7 @@ export const lessons = sqliteTable('lessons', {
   duration: integer('duration').notNull(), // Minutes
   type: text('type').notNull().default('lesson'), // 'lesson', 'quiz', 'project', 'checkpoint'
   xpReward: integer('xp_reward').notNull().default(0),
-  isRequired: integer('is_required', { mode: 'boolean' }).notNull().default(1),
+  isRequired: integer('is_required', { mode: 'boolean' }).notNull().default(true),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 }, (table) => ({

@@ -9,6 +9,7 @@
     "db:generate": "turbo run db:generate"
   },
   "devDependencies": {
+    "bun-types": "^1.3.1",
     "turbo": "2.5.8",
     "typescript": "^5.7.2"
   },

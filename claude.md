@@ -432,9 +432,43 @@ bun add @kinly/trpc-types
 
 ### Checklist
 
-⬜ Create `packages/trpc-types` workspace
-⬜ Add build script for declarations
-⬜ Export `AppRouter` type
-⬜ Build package
-⬜ Link locally for frontend team
+✅ Create `packages/trpc-types` workspace
+✅ Add build script for declarations
+✅ Export `AppRouter` type
+✅ Build package
+✅ Link locally for frontend team
 ⬜ (Optional) Publish to NPM registry
+
+### ⚠️ BLOCKER: TypeScript Errors (2025-01-05)
+
+**Status:** Package created but frontend can't use it yet
+
+**Problem:** Backend has implicit `any` types that fail when frontend imports `AppRouter`.
+
+**Error Location:**
+```
+apps/api/src/trpc/routers/courses.ts:26:17
+Parameter 'courses' implicitly has an 'any' type.
+orderBy: (courses, { asc }) => [asc(courses.order)],
+         ^^^^^^^
+```
+
+**Fix Required:**
+```typescript
+// ❌ Current (implicit any)
+orderBy: (courses, { asc }) => [asc(courses.order)],
+
+// ✅ Fix option 1 (explicit type)
+orderBy: (courses: typeof coursesTable, { asc }) => [asc(courses.order)],
+
+// ✅ Fix option 2 (direct reference)
+orderBy: [asc(coursesTable.order)],
+```
+
+**Steps to Unblock:**
+1. Enable `strict: true` in tsconfig.json
+2. Fix all implicit `any` errors (run `tsc --noEmit`)
+3. Rebuild `packages/trpc-types` (cd packages/trpc-types && bun run build)
+4. Frontend can then import real types
+
+**Frontend Doc:** `../velocity-landing-page/Docs/11-05-2025/BACKEND_TYPESCRIPT_ERRORS.md`

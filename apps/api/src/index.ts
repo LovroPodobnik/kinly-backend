@@ -15,14 +15,23 @@ syncContentToDatabase().catch((err) => {
 })
 
 // Global CORS middleware
+const allowedOrigins = new Set([
+  'http://localhost:3000',      // Local dev
+  'http://localhost:3001',      // Local dev
+  'https://www.kinly.si',       // Production
+  'https://kinly.si',           // Production (non-www)
+]);
+
 app.use('*', cors({
-  origin: [
-    'http://localhost:3000',      // Local dev
-    'http://localhost:3001',      // Local dev
-    'https://www.kinly.si',       // Production
-    'https://kinly.si',           // Production (non-www)
-    /https:\/\/.*\.vercel\.app$/  // Vercel preview deployments
-  ],
+  origin: (origin) => {
+    if (!origin) return origin;
+    // Allow Vercel preview deployments
+    if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return origin;
+    // Allow whitelisted origins
+    if (allowedOrigins.has(origin)) return origin;
+    // Default fallback
+    return 'https://kinly.si';
+  },
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true,

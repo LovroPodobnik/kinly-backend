@@ -10,6 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "types": ["bun-types"],
     "baseUrl": ".",
     "paths": {
       "@db/*": ["packages/db/src/*"],

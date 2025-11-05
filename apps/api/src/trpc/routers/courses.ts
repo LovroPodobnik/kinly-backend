@@ -8,7 +8,7 @@ import {
   userLessonProgress,
   userStats,
 } from '@my-app/db';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, asc } from 'drizzle-orm';
 import {
   awardXP,
   updateStreak,
@@ -23,7 +23,7 @@ export const coursesRouter = router({
   getAll: publicProcedure.query(async () => {
     return await db.query.courses.findMany({
       where: eq(courses.status, 'published'),
-      orderBy: (courses, { asc }) => [asc(courses.order)],
+      orderBy: [asc(courses.order)],
     });
   }),
 
@@ -37,7 +37,7 @@ export const coursesRouter = router({
         where: eq(courses.id, input.id),
         with: {
           lessons: {
-            orderBy: (lessons, { asc }) => [asc(lessons.order)],
+            orderBy: [asc(lessons.order)],
           },
         },
       });
@@ -140,7 +140,7 @@ export const coursesRouter = router({
         course: {
           with: {
             lessons: {
-              orderBy: (lessons, { asc }) => [asc(lessons.order)],
+              orderBy: [asc(lessons.order)],
             },
           },
         },
@@ -349,19 +349,19 @@ export const coursesRouter = router({
       ),
     });
 
-    const totalLessons = enrollment.course.lessons.filter((l) => l.isRequired).length;
-    const lessonsCompleted = completedLessons.filter((progress) =>
+    const totalLessons = enrollment.course.lessons.filter((l: any) => l.isRequired).length;
+    const lessonsCompleted = completedLessons.filter((progress: any) =>
       enrollment.course.lessons.some(
-        (lesson) => lesson.id === progress.lessonId && lesson.isRequired
+        (lesson: any) => lesson.id === progress.lessonId && lesson.isRequired
       )
     ).length;
 
     // Find current lesson (first incomplete required lesson)
     const currentLesson = enrollment.course.lessons
-      .filter((l) => l.isRequired)
+      .filter((l: any) => l.isRequired)
       .find(
-        (lesson) =>
-          !completedLessons.some((progress) => progress.lessonId === lesson.id)
+        (lesson: any) =>
+          !completedLessons.some((progress: any) => progress.lessonId === lesson.id)
       );
 
     return {

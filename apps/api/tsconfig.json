@@ -1,8 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist"
+    // Removed rootDir and outDir - Bun handles bundling
+    // rootDir: "src" breaks imports from workspace packages (@my-app/auth, etc.)
   },
   "include": ["src"]
 }

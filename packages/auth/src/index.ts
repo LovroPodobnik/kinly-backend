@@ -294,11 +294,6 @@ export const auth = betterAuth({
       clientSecret: process.env.GITHUB_SECRET ?? '',
     },
   },
-  session: {
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-    },
-  },
   advanced: {
     defaultCookieAttributes: {
       sameSite: 'none',  // Required for cross-domain (www.kinly.si -> fly.dev)
@@ -391,4 +386,5 @@ export const auth = betterAuth({
 });
 
 export type Auth = typeof auth;
-export type Session = Awaited<ReturnType<typeof auth.api.getSession>>['session'];
+type AuthSessionResult = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
+export type Session = AuthSessionResult['session'];

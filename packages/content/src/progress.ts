@@ -162,8 +162,8 @@ export async function calculateProgress(enrollmentId: string): Promise<number> {
     ),
   });
 
-  const completedRequired = courseLessons.filter((lesson) =>
-    completedLessons.some((progress) => progress.lessonId === lesson.id)
+  const completedRequired = courseLessons.filter((lesson: any) =>
+    completedLessons.some((progress: any) => progress.lessonId === lesson.id)
   ).length;
 
   return Math.floor((completedRequired / totalRequired) * 100);
