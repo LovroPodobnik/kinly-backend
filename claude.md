@@ -302,3 +302,139 @@ git push origin main
 ✅ Server startup sync
 ⬜ Enrollment flow (not yet implemented)
 ⬜ Progress tracking (not yet implemented)
+
+---
+
+# tRPC Type Sharing for Frontend (CRITICAL)
+
+## Problem
+
+Frontend (velocity-landing-page) is in a **separate repository**. tRPC v11 requires `AppRouter` type at compile time for type safety. Direct imports cause frontend to compile backend code → build failures.
+
+**Impact:** Frontend currently uses type assertions (stopgap) which loses all compile-time safety:
+- ❌ No autocomplete for endpoints
+- ❌ No TypeScript errors for typos
+- ❌ No input/output validation
+- ⚠️ Errors only at runtime
+
+## Solution: Shared Types Package
+
+Export `AppRouter` type as lightweight NPM package (`@kinly/trpc-types`) that frontend can install.
+
+### Implementation (30min)
+
+**1. Create package structure:**
+```bash
+mkdir -p packages/trpc-types/src
+```
+
+**2. `packages/trpc-types/package.json`:**
+```json
+{
+  "name": "@kinly/trpc-types",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc --emitDeclarationOnly --declaration --declarationMap",
+    "dev": "tsc --emitDeclarationOnly --declaration --declarationMap --watch"
+  },
+  "peerDependencies": {
+    "@trpc/server": "^11.0.0"
+  }
+}
+```
+
+**3. `packages/trpc-types/src/index.ts`:**
+```typescript
+// Re-export AppRouter type for frontend
+export type { AppRouter } from '@my-app/api/src/trpc/root';
+```
+
+**4. `packages/trpc-types/tsconfig.json`:**
+```json
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["src/**/*"]
+}
+```
+
+**5. Build and link:**
+```bash
+cd packages/trpc-types
+bun run build        # Creates dist/index.d.ts
+npm link             # Makes available locally
+```
+
+**6. Frontend uses:**
+```typescript
+// velocity-landing-page/src/lib/trpc.ts
+import type { AppRouter } from '@kinly/trpc-types';  // ✅ Real types
+export const api = createTRPCReact<AppRouter>();
+```
+
+### Development Workflow
+
+```bash
+# Terminal 1: Watch types (rebuilds on API changes)
+cd packages/trpc-types && bun run dev
+
+# Terminal 2: Backend dev
+bun run dev
+```
+
+When you change tRPC routers:
+1. Types rebuild automatically (if watch mode)
+2. Frontend gets TypeScript errors if breaking changes
+3. No manual sync needed
+
+### Production Deployment
+
+Publish to NPM (public or private):
+```bash
+cd packages/trpc-types
+npm publish --access public
+```
+
+Frontend installs:
+```bash
+bun add @kinly/trpc-types
+```
+
+### Why This Pattern
+
+- ✅ **No runtime code** - Only `.d.ts` type declarations
+- ✅ **Automatic updates** - Types match backend exactly
+- ✅ **Frontend type safety** - Catches errors at compile time
+- ✅ **Version control** - Can pin to specific API version
+- ✅ **Zero backend changes** - Just re-exports existing types
+
+### Reference
+
+- **Frontend request:** `../velocity-landing-page/Docs/11-05-2025/BACKEND_TYPE_SHARING_REQUEST.md`
+- **Frontend stopgap:** `../velocity-landing-page/Docs/11-05-2025/TRPC_FIX_APPLIED.md`
+- **Status:** Not yet implemented (frontend using type assertions)
+
+### Checklist
+
+⬜ Create `packages/trpc-types` workspace
+⬜ Add build script for declarations
+⬜ Export `AppRouter` type
+⬜ Build package
+⬜ Link locally for frontend team
+⬜ (Optional) Publish to NPM registry
